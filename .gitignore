@@ -1,0 +1,5 @@
+# VSCode
+.vscode/
+
+# build file
+server/whatsapp-bridge
