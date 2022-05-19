@@ -21,6 +21,7 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	go func() {
+		// goroutines for syncing client connections
 		models.StartSyncingToAllExistingDevices()
 	}()
 

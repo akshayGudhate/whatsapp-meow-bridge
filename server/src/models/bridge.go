@@ -22,6 +22,38 @@ import (
 )
 
 //////////////////
+//   database   //
+//////////////////
+
+// database struct
+type Database struct {
+	Container   *sqlstore.Container
+	DeviceStore []*store.Device
+}
+
+// placeholder for database
+var db Database
+
+// method to connect database
+func (db *Database) ConnectToDatabase() {
+	var err error
+	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+
+	// database
+	db.Container, err = sqlstore.New(databaseDialect, databaseURL, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// All devices
+	db.DeviceStore, err = db.Container.GetAllDevices()
+	if err != nil {
+		panic(err)
+	}
+}
+
+//////////////////
 //    client    //
 //////////////////
 
@@ -42,23 +74,13 @@ func WhatsappClientConnection(client *whatsmeow.Client) {
 ///////////////////
 
 func StartSyncingToAllExistingDevices() {
-	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+	// connect to database
+	db.ConnectToDatabase()
 
-	// database
-	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
-	if err != nil {
-		panic(err)
-	}
-	// All devices
-	deviceStore, err := container.GetAllDevices()
-	if err != nil {
-		panic(err)
-	}
-
+	// run goroutines to sync devices
 	go func() {
 		// connect to all devices
-		for _, device := range deviceStore {
+		for _, device := range db.DeviceStore {
 			// get client and connect one by one
 			MeowClient = whatsmeow.NewClient(device, nil)
 			// add receive handler
@@ -74,24 +96,11 @@ func StartSyncingToAllExistingDevices() {
 /////////////////////
 
 func SyncWithGivenDevice(phone string) string {
-	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
-
-	// database
-	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
-	if err != nil {
-		panic(err)
-	}
-	// All devices
-	deviceStore, err := container.GetAllDevices()
-	if err != nil {
-		panic(err)
-	}
 
 	// search device and connect
 	var userDevice *store.Device
 	// check existing devices
-	for _, device := range deviceStore {
+	for _, device := range db.DeviceStore {
 		if device.ID.User == phone {
 			userDevice = device
 			break
@@ -100,7 +109,7 @@ func SyncWithGivenDevice(phone string) string {
 
 	// if not add new device
 	if userDevice == nil {
-		userDevice = container.NewDevice()
+		userDevice = db.Container.NewDevice()
 	}
 
 	// create client
@@ -162,24 +171,10 @@ func eventHandler(event interface{}) {
 
 // Send Message
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
-	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
-
-	// database
-	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
-	if err != nil {
-		panic(err)
-	}
-	// All devices
-	deviceStore, err := container.GetAllDevices()
-	if err != nil {
-		panic(err)
-	}
-
 	// search device and connect
 	var userDevice *store.Device
 	// check existing devices
-	for _, device := range deviceStore {
+	for _, device := range db.DeviceStore {
 		if device.ID.User == fromPhone {
 			userDevice = device
 			break
@@ -202,7 +197,7 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	messageText := &waProto.Message{Conversation: proto.String(text)}
 
 	// send message
-	_, err = MeowClient.SendMessage(recipient, "", messageText)
+	_, err := MeowClient.SendMessage(recipient, "", messageText)
 	if err != nil {
 		return "Something went wrong! Try Again."
 	}
