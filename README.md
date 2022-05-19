@@ -23,7 +23,7 @@ Using the above library we I have created a HTTP server, which can handle multip
 - Run `go build` and then `./whatsapp-bridge` to run the code or simply Run `go run .` to start the HTTP server.
 
 ### Supported API's
-- Adding `API-COllection.json` file for the reference
+- Adding `API-Collection.json` file for the reference
 
 * 1. Connect to server: `http://localhost:8080/api/connect/qr?fromPhone=9195xxxxxx85` provide *fromPhone* --> Scan the QR code using whatsapp.
 * 2. Send whatsapp message: `http://localhost:8080/api/whatsapp/send` provide *fromPhone*, *toPhone* and *messageText*.
