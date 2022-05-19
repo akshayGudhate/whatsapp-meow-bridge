@@ -1,4 +1,4 @@
-package models
+package services
 
 import (
 	godotenv "github.com/joho/godotenv"

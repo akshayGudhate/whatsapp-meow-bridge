@@ -7,6 +7,7 @@ import (
 
 	models "akshayGudhate/whatsapp-bridge/src/models"
 	routing "akshayGudhate/whatsapp-bridge/src/routes"
+	services "akshayGudhate/whatsapp-bridge/src/services"
 	handlers "github.com/gorilla/handlers"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	)(routing.Routes())
 
 	// het port from env file
-	portNumber := models.GetEnvironmentVariables("PORT")
+	portNumber := services.GetEnvironmentVariables("PORT")
 
 	// server
 	srv := &http.Server{

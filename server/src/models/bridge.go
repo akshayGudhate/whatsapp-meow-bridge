@@ -18,6 +18,7 @@ import (
 	proto "google.golang.org/protobuf/proto"
 
 	handlers "akshayGudhate/whatsapp-bridge/src/handlers"
+	services "akshayGudhate/whatsapp-bridge/src/services"
 )
 
 //////////////////
@@ -41,8 +42,9 @@ func WhatsappClientConnection(client *whatsmeow.Client) {
 ///////////////////
 
 func StartSyncingToAllExistingDevices() {
-	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
+	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -72,8 +74,9 @@ func StartSyncingToAllExistingDevices() {
 /////////////////////
 
 func SyncWithGivenDevice(phone string) string {
-	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
+	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -159,8 +162,9 @@ func eventHandler(event interface{}) {
 
 // Send Message
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
-	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
+	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
