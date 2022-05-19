@@ -10,9 +10,12 @@ import (
 
 	_ "github.com/lib/pq"
 	whatsmeow "go.mau.fi/whatsmeow"
+	waProto "go.mau.fi/whatsmeow/binary/proto"
+	store "go.mau.fi/whatsmeow/store"
 	sqlstore "go.mau.fi/whatsmeow/store/sqlstore"
 	types "go.mau.fi/whatsmeow/types"
 	events "go.mau.fi/whatsmeow/types/events"
+	proto "google.golang.org/protobuf/proto"
 
 	handlers "akshayGudhate/whatsapp-bridge/src/handlers"
 )
@@ -32,11 +35,21 @@ const (
 
 var MeowClient *whatsmeow.Client
 
+func WhatsappClientConnection(client *whatsmeow.Client) {
+	err := client.Connect()
+	if err != nil {
+		panic(err)
+	}
+	if client.Store.ID != nil {
+		fmt.Println("Connected to --->", client.Store.ID)
+	}
+}
+
 ///////////////////
 //  all devices  //
 ///////////////////
 
-func ConnectToAllClients() {
+func StartSyncingToAllExistingDevices() {
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -49,62 +62,61 @@ func ConnectToAllClients() {
 		panic(err)
 	}
 
-	//
 	// connect to all devices
-	//
-	fmt.Println("------------------------ Connecting to existing devices ------------------------")
-	for i := 0; i < len(deviceStore); i++ {
+	for _, device := range deviceStore {
 		// get client and connect one by one
-		MeowClient = whatsmeow.NewClient(deviceStore[i], nil)
+		MeowClient = whatsmeow.NewClient(device, nil)
 		// add receive handler
 		MeowClient.AddEventHandler(eventHandler)
-		err = MeowClient.Connect()
-		fmt.Println("Connected to client --->", MeowClient.Store.ID)
-		if err != nil {
-			panic(err)
-		}
+		// connect to client
+		WhatsappClientConnection(MeowClient)
 	}
-	fmt.Println("------------------------ Connected to all the devices ------------------------")
 }
 
 /////////////////////
 //  single device  //
 /////////////////////
 
-func ConnectToGivenClient(phone string) string {
+func SyncWithGivenDevice(phone string) string {
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
 		panic(err)
 	}
-
-	// TODO:
-	// 1. get phone number from the DB
-	// 2. get JID and parse of user for connection
-	// 2. check weather device already present for JID
-	// 3. if device available then connect
-	// 4. if device not available then create device & then connect
+	// All devices
+	deviceStore, err := container.GetAllDevices()
+	if err != nil {
+		panic(err)
+	}
 
 	// search device and connect
-	singleDevice := container.NewDevice()
+	var userDevice *store.Device
+	// check existing devices
+	for _, device := range deviceStore {
+		if device.ID.User == phone {
+			userDevice = device
+			break
+		}
+	}
+
+	// if not add new device
+	if userDevice == nil {
+		userDevice = container.NewDevice()
+	}
 
 	// create client
-	MeowClient = whatsmeow.NewClient(singleDevice, nil)
+	MeowClient = whatsmeow.NewClient(userDevice, nil)
 	// add receive handler
 	MeowClient.AddEventHandler(eventHandler)
-	newClient, _ := types.ParseJID("919561214185@s.whatsapp.net")
 
 	//
 	// reconnection
 	//
-	if MeowClient.Store.ID == nil || *MeowClient.Store.ID != newClient {
+	if MeowClient.Store.ID == nil {
 		// No ID stored, new login
 		qrChan, _ := MeowClient.GetQRChannel(context.Background())
-		err = MeowClient.Connect()
-		fmt.Println("Connected to client --->", MeowClient.Store.ID)
-		if err != nil {
-			panic(err)
-		}
+		// connect to client
+		WhatsappClientConnection(MeowClient)
 
 		for evt := range qrChan {
 			if evt.Event == "code" {
@@ -114,12 +126,8 @@ func ConnectToGivenClient(phone string) string {
 		}
 
 	} else {
-		// Already logged in, just connect
-		err = MeowClient.Connect()
-		fmt.Println("Connected to client --->", MeowClient.Store.ID)
-		if err != nil {
-			panic(err)
-		}
+		// connect to client
+		WhatsappClientConnection(MeowClient)
 	}
 	return ""
 }
@@ -128,6 +136,7 @@ func ConnectToGivenClient(phone string) string {
 //    events    //
 //////////////////
 
+// Receive Message
 func eventHandler(event interface{}) {
 	switch v := event.(type) {
 	// messages
@@ -150,4 +159,50 @@ func eventHandler(event interface{}) {
 		// 	fmt.Printf("Unknown Event: %+v \n", v)
 		// 	fmt.Println(".........................................")
 	}
+}
+
+// Send Message
+func SendWhatsappMessage(fromPhone, toPhone, text string) string {
+	// encode the data
+	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
+	messageText := &waProto.Message{Conversation: proto.String(text)}
+
+	// database
+	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
+	if err != nil {
+		panic(err)
+	}
+	// All devices
+	deviceStore, err := container.GetAllDevices()
+	if err != nil {
+		panic(err)
+	}
+
+	// search device and connect
+	var userDevice *store.Device
+	// check existing devices
+	for _, device := range deviceStore {
+		if device.ID.User == fromPhone {
+			userDevice = device
+			break
+		}
+	}
+	// if not add new device
+	if userDevice == nil {
+		return "Invalid from phone number"
+	}
+
+	// create client
+	MeowClient = whatsmeow.NewClient(userDevice, nil)
+	// add receive handler
+	MeowClient.AddEventHandler(eventHandler)
+	// connect to client
+	WhatsappClientConnection(MeowClient)
+
+	// send message
+	_, err = MeowClient.SendMessage(recipient, "", messageText)
+	if err != nil {
+		return "Something went wrong! Try Again."
+	}
+	return ""
 }

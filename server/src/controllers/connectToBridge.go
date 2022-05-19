@@ -17,40 +17,41 @@ import (
 
 // send whatsapp message
 func GetConnectionQRCode(w http.ResponseWriter, r *http.Request) {
-
+	// parse params
 	fromPhone := r.URL.Query().Get("fromPhone")
-	if fromPhone == "" {
-		// response - success
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(
-			map[string]interface{}{
-				"status": false,
-				"info":   "Already Connected!",
-			},
-		)
-	}
+	if fromPhone != "" {
+		// connect to client
+		newQRCodeBufferString := models.SyncWithGivenDevice(fromPhone)
 
-	// connect to client
-	newQRCodeBufferString := models.ConnectToGivenClient(fromPhone)
+		// if not connected then connect
+		if newQRCodeBufferString != "" {
+			// generate qr code
+			qrCode, _ := qr.Encode(newQRCodeBufferString, qr.L, qr.Auto)
+			qrCode, _ = barcode.Scale(qrCode, 256, 256)
 
-	// if not connected then connect
-	if newQRCodeBufferString != "" {
-		// generate qr code
-		qrCode, _ := qr.Encode(newQRCodeBufferString, qr.L, qr.Auto)
-		qrCode, _ = barcode.Scale(qrCode, 256, 256)
+			// response - qr code
+			png.Encode(w, qrCode)
 
-		// response - success
-		png.Encode(w, qrCode)
+		} else {
+			// response - already scanned
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(
+				map[string]interface{}{
+					"status": false,
+					"info":   "This device is already connected!",
+				},
+			)
+		}
 
 	} else {
-		// response - success
+		// response - already scanned
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(
 			map[string]interface{}{
 				"status": false,
-				"info":   "Already Connected!",
+				"info":   "Invalid phone number!",
 			},
 		)
 	}

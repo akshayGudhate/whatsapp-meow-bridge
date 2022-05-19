@@ -4,7 +4,7 @@ import (
 	json "encoding/json"
 	http "net/http"
 
-	services "akshayGudhate/whatsapp-bridge/src/services"
+	models "akshayGudhate/whatsapp-bridge/src/models"
 )
 
 //////////////////
@@ -30,19 +30,24 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&message)
 
 	// send whatsapp message
-	err := services.SendWhatsappMessage(message.FromPhone, message.ToPhone, message.MessageText)
-
-	// response - error
-	if err != nil {
-		panic(err)
+	responseString := models.SendWhatsappMessage(message.FromPhone, message.ToPhone, message.MessageText)
+	if responseString != "" {
+		// response - success
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(
+			map[string]interface{}{
+				"status": false,
+				"info":   responseString,
+			},
+		)
+	} else {
+		// response - success
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(
+			map[string]interface{}{
+				"status": true,
+				"info":   "Message sent!",
+			},
+		)
 	}
-
-	// response - success
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(
-		map[string]interface{}{
-			"status": true,
-			"info":   "Message sent!",
-		},
-	)
 }
