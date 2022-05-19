@@ -10,12 +10,6 @@ import (
 	handlers "github.com/gorilla/handlers"
 )
 
-//////////////////
-//   constant   //
-//////////////////
-
-const portNumber string = ":8080"
-
 /////////////////////
 //   main method   //
 /////////////////////
@@ -36,6 +30,9 @@ func main() {
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 	)(routing.Routes())
+
+	// het port from env file
+	portNumber := models.GetEnvironmentVariables("PORT")
 
 	// server
 	srv := &http.Server{

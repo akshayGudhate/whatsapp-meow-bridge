@@ -3,3 +3,6 @@
 
 # build file
 server/whatsapp-bridge
+
+# Environment
+server/.env

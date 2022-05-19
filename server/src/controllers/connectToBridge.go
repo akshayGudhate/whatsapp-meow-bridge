@@ -45,9 +45,9 @@ func GetConnectionQRCode(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		// response - already scanned
+		// response - invalid phone
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(
 			map[string]interface{}{
 				"status": false,

@@ -6,6 +6,7 @@ require (
 	github.com/boombuler/barcode v1.0.1
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.6
 	go.mau.fi/whatsmeow v0.0.0-20220517205516-246a2007ca7f
 	google.golang.org/protobuf v1.28.0

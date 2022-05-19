@@ -33,7 +33,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	responseString := models.SendWhatsappMessage(message.FromPhone, message.ToPhone, message.MessageText)
 	if responseString != "" {
 		// response - success
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(
 			map[string]interface{}{
 				"status": false,

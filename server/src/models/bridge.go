@@ -21,15 +21,6 @@ import (
 )
 
 //////////////////
-//   variable   //
-//////////////////
-
-const (
-	databaseDialect string = "postgres"
-	databaseURL     string = "postgres://akshayg:peshawa8@127.0.0.1:5432/whatsmeow"
-)
-
-//////////////////
 //    client    //
 //////////////////
 
@@ -50,6 +41,8 @@ func WhatsappClientConnection(client *whatsmeow.Client) {
 ///////////////////
 
 func StartSyncingToAllExistingDevices() {
+	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -79,6 +72,8 @@ func StartSyncingToAllExistingDevices() {
 /////////////////////
 
 func SyncWithGivenDevice(phone string) string {
+	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -164,6 +159,8 @@ func eventHandler(event interface{}) {
 
 // Send Message
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
+	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL     := GetEnvironmentVariables("DATABASE_URL")
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -186,7 +183,7 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	}
 	// if not add new device
 	if userDevice == nil {
-		return "Invalid from phone number"
+		return "Invalid from phone number."
 	}
 
 	// create client
