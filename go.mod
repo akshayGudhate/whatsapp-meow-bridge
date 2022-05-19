@@ -9,4 +9,7 @@ require (
 	google.golang.org/protobuf v1.28.0
 )
 
-require filippo.io/edwards25519 v1.0.0-rc.1 // indirect
+require (
+	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
+	github.com/lib/pq v1.10.6
+)

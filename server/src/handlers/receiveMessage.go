@@ -28,22 +28,17 @@ func ReceiveMessage(m *events.Message, c *whatsmeow.Client) {
 		if m.Info.IsGroup {
 			// group message
 			fmt.Println(
-				"Group Details: ",
-				*m.Message.Conversation,
-				"-------> from: ",
-				m.Info.PushName,
-				"(", m.Info.Sender, ")",
-				"-------> in group",
-				m.Info.Chat,
+				"Group Details: ", *m.Message.Conversation,
+				"---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
+				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
+				"---> in group", m.Info.Chat,
 			)
 		} else {
 			// personal message
 			fmt.Println(
-				"Personal Message: ",
-				*m.Message.Conversation,
-				"-------> from: ",
-				m.Info.PushName,
-				"(", m.Info.Sender, ")",
+				"Personal Message: ", *m.Message.Conversation,
+				"---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
+				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
 			)
 
 			// products details

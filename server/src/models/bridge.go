@@ -55,22 +55,23 @@ func StartSyncingToAllExistingDevices() {
 	if err != nil {
 		panic(err)
 	}
-
 	// All devices
 	deviceStore, err := container.GetAllDevices()
 	if err != nil {
 		panic(err)
 	}
 
-	// connect to all devices
-	for _, device := range deviceStore {
-		// get client and connect one by one
-		MeowClient = whatsmeow.NewClient(device, nil)
-		// add receive handler
-		MeowClient.AddEventHandler(eventHandler)
-		// connect to client
-		WhatsappClientConnection(MeowClient)
-	}
+	go func() {
+		// connect to all devices
+		for _, device := range deviceStore {
+			// get client and connect one by one
+			MeowClient = whatsmeow.NewClient(device, nil)
+			// add receive handler
+			MeowClient.AddEventHandler(eventHandler)
+			// connect to client
+			WhatsappClientConnection(MeowClient)
+		}
+	}()
 }
 
 /////////////////////
@@ -163,10 +164,6 @@ func eventHandler(event interface{}) {
 
 // Send Message
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
-	// encode the data
-	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
-	messageText := &waProto.Message{Conversation: proto.String(text)}
-
 	// database
 	container, err := sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
@@ -198,6 +195,10 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	MeowClient.AddEventHandler(eventHandler)
 	// connect to client
 	WhatsappClientConnection(MeowClient)
+
+	// encode the data
+	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
+	messageText := &waProto.Message{Conversation: proto.String(text)}
 
 	// send message
 	_, err = MeowClient.SendMessage(recipient, "", messageText)
