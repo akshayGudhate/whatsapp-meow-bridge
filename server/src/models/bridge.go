@@ -21,6 +21,14 @@ import (
 	services "akshayGudhate/whatsapp-bridge/src/services"
 )
 
+//////////////////////
+//   placeholders   //
+//////////////////////
+
+var err error
+var db Database
+var MeowClient *whatsmeow.Client
+
 //////////////////
 //   database   //
 //////////////////
@@ -31,22 +39,20 @@ type Database struct {
 	DeviceStore []*store.Device
 }
 
-// placeholder for database
-var db Database
-
 // method to connect database
 func (db *Database) ConnectToDatabase() {
-	var err error
 	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
 	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
 
-	// database
+	// connection
 	db.Container, err = sqlstore.New(databaseDialect, databaseURL, nil)
 	if err != nil {
 		panic(err)
 	}
+}
 
-	// All devices
+// method to get all connect devices
+func (db *Database) GetAllConnectedDevices() {
 	db.DeviceStore, err = db.Container.GetAllDevices()
 	if err != nil {
 		panic(err)
@@ -57,10 +63,8 @@ func (db *Database) ConnectToDatabase() {
 //    client    //
 //////////////////
 
-var MeowClient *whatsmeow.Client
-
 func WhatsappClientConnection(client *whatsmeow.Client) {
-	err := client.Connect()
+	err = client.Connect()
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +79,11 @@ func WhatsappClientConnection(client *whatsmeow.Client) {
 
 func StartSyncingToAllExistingDevices() {
 	// connect to database
-	db.ConnectToDatabase()
+	if db.Container == nil {
+		db.ConnectToDatabase()
+	}
+	// all connected devices updated
+	db.GetAllConnectedDevices()
 
 	// run goroutines to sync devices
 	go func() {
@@ -96,6 +104,12 @@ func StartSyncingToAllExistingDevices() {
 /////////////////////
 
 func SyncWithGivenDevice(phone string) string {
+	// connect to database
+	if db.Container == nil {
+		db.ConnectToDatabase()
+	}
+	// all connected devices updated
+	db.GetAllConnectedDevices()
 
 	// search device and connect
 	var userDevice *store.Device
@@ -110,6 +124,7 @@ func SyncWithGivenDevice(phone string) string {
 	// if not add new device
 	if userDevice == nil {
 		userDevice = db.Container.NewDevice()
+		userDevice.Save()
 	}
 
 	// create client
@@ -150,6 +165,8 @@ func eventHandler(event interface{}) {
 	// messages
 	case *events.Message:
 		handlers.ReceiveMessage(v, MeowClient)
+	case *events.PairSuccess:
+		fmt.Println("Connected to --->", &v.ID)
 
 		/** Uncomment below comments to get below info */
 
@@ -171,6 +188,13 @@ func eventHandler(event interface{}) {
 
 // Send Message
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
+	// connect to database
+	if db.Container == nil {
+		db.ConnectToDatabase()
+	}
+	// all connected devices updated
+	db.GetAllConnectedDevices()
+
 	// search device and connect
 	var userDevice *store.Device
 	// check existing devices
@@ -196,10 +220,15 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
 	messageText := &waProto.Message{Conversation: proto.String(text)}
 
+	//
 	// send message
-	_, err := MeowClient.SendMessage(recipient, "", messageText)
+	//
+	go func() {
+		_, err = MeowClient.SendMessage(recipient, "", messageText)
+	}()
 	if err != nil {
 		return "Something went wrong! Try Again."
 	}
+
 	return ""
 }

@@ -40,14 +40,15 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 				"info":   responseString,
 			},
 		)
-	} else {
-		// response - success
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(
-			map[string]interface{}{
-				"status": true,
-				"info":   "Message sent!",
-			},
-		)
+		return
 	}
+
+	// response - success
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"status": true,
+			"info":   "Message sent!",
+		},
+	)
 }

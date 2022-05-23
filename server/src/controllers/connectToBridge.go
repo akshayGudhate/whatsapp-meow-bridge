@@ -27,32 +27,32 @@ func GetConnectionQRCode(w http.ResponseWriter, r *http.Request) {
 		if newQRCodeBufferString != "" {
 			// generate qr code
 			qrCode, _ := qr.Encode(newQRCodeBufferString, qr.L, qr.Auto)
-			qrCode, _ = barcode.Scale(qrCode, 256, 256)
+			qrCode, _ = barcode.Scale(qrCode, 512, 512)
 
 			// response - qr code
 			png.Encode(w, qrCode)
-
-		} else {
-			// response - already scanned
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(
-				map[string]interface{}{
-					"status": false,
-					"info":   "This device is already connected!",
-				},
-			)
+			return
 		}
 
-	} else {
-		// response - invalid phone
+		// response - already scanned
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(
 			map[string]interface{}{
 				"status": false,
-				"info":   "Invalid phone number!",
+				"info":   "This device is already connected!",
 			},
 		)
+		return
 	}
+
+	// response - invalid phone
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"status": false,
+			"info":   "Invalid phone number!",
+		},
+	)
 }
