@@ -39,7 +39,7 @@ var (
 
 // env variables
 var (
-	DATABASE_URL = services.DATABASE_URL
+	DATABASE_URL     = services.DATABASE_URL
 	DATABASE_DIALECT = services.DATABASE_DIALECT
 )
 
@@ -68,6 +68,7 @@ func (db *Database) GetAllConnectedDevices() {
 //    client    //
 //////////////////
 
+// method to establish client connection
 func WhatsappClientConnection(client *whatsmeow.Client) {
 	err = client.Connect()
 	if err != nil {
