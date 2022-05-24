@@ -5,10 +5,8 @@ import (
 	http "net/http"
 	os "os"
 
-	models "akshayGudhate/whatsapp-bridge/src/models"
-	routing "akshayGudhate/whatsapp-bridge/src/routes"
-	services "akshayGudhate/whatsapp-bridge/src/services"
-	handlers "github.com/gorilla/handlers"
+	api "akshayGudhate/whatsapp-bridge/src/api"
+	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
 )
 
 /////////////////////
@@ -22,25 +20,17 @@ func main() {
 
 	go func() {
 		// goroutines for syncing client connections
-		models.StartSyncingToAllExistingDevices()
+		bridge.StartSyncingToAllExistingDevices()
 	}()
 
-	// cors handler
-	handlerWithCors := handlers.CORS(
-		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowCredentials(),
-	)(routing.Routes())
-
 	// het port from env file
-	portNumber := services.GetEnvironmentVariables("PORT")
+	portNumber := bridge.GetEnvironmentVariables("PORT")
 
 	// server
 	srv := &http.Server{
 		Addr:     portNumber,
 		ErrorLog: errorLog,
-		Handler:  handlerWithCors,
+		Handler:  api.GetHandlerWithRoutes(),
 	}
 
 	// initialize

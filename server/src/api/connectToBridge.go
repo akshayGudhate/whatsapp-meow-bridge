@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	json "encoding/json"
@@ -8,7 +8,7 @@ import (
 	barcode "github.com/boombuler/barcode"
 	qr "github.com/boombuler/barcode/qr"
 
-	models "akshayGudhate/whatsapp-bridge/src/models"
+	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
 )
 
 //////////////////
@@ -21,7 +21,7 @@ func GetConnectionQRCode(w http.ResponseWriter, r *http.Request) {
 	fromPhone := r.URL.Query().Get("fromPhone")
 	if fromPhone != "" {
 		// connect to client
-		newQRCodeBufferString := models.SyncWithGivenDevice(fromPhone)
+		newQRCodeBufferString := bridge.SyncWithGivenDevice(fromPhone)
 
 		// if not connected then connect
 		if newQRCodeBufferString != "" {

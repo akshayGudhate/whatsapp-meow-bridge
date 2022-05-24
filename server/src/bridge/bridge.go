@@ -1,4 +1,4 @@
-package models
+package bridge
 
 //////////////////
 //    import    //
@@ -16,15 +16,19 @@ import (
 	types "go.mau.fi/whatsmeow/types"
 	events "go.mau.fi/whatsmeow/types/events"
 	proto "google.golang.org/protobuf/proto"
-
-	handlers "akshayGudhate/whatsapp-bridge/src/handlers"
-	services "akshayGudhate/whatsapp-bridge/src/services"
 )
 
-//////////////////////
-//   placeholders   //
-//////////////////////
+///////////////////
+//   variables   //
+///////////////////
 
+// database struct
+type Database struct {
+	Container   *sqlstore.Container
+	DeviceStore []*store.Device
+}
+
+// placeholders
 var err error
 var db Database
 var MeowClient *whatsmeow.Client
@@ -33,16 +37,10 @@ var MeowClient *whatsmeow.Client
 //   database   //
 //////////////////
 
-// database struct
-type Database struct {
-	Container   *sqlstore.Container
-	DeviceStore []*store.Device
-}
-
 // method to connect database
 func (db *Database) ConnectToDatabase() {
-	databaseDialect := services.GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL := services.GetEnvironmentVariables("DATABASE_URL")
+	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
+	databaseURL := GetEnvironmentVariables("DATABASE_URL")
 
 	// connection
 	db.Container, err = sqlstore.New(databaseDialect, databaseURL, nil)
@@ -164,7 +162,7 @@ func eventHandler(event interface{}) {
 	switch v := event.(type) {
 	// messages
 	case *events.Message:
-		handlers.ReceiveMessage(v, MeowClient)
+		ReceiveMessage(v, MeowClient)
 	case *events.PairSuccess:
 		fmt.Println("Connected to --->", &v.ID)
 

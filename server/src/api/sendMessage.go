@@ -1,10 +1,10 @@
-package controllers
+package api
 
 import (
 	json "encoding/json"
 	http "net/http"
 
-	models "akshayGudhate/whatsapp-bridge/src/models"
+	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
 )
 
 //////////////////
@@ -30,7 +30,9 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&message)
 
 	// send whatsapp message
-	responseString := models.SendWhatsappMessage(message.FromPhone, message.ToPhone, message.MessageText)
+	responseString := bridge.SendWhatsappMessage(
+		message.FromPhone, message.ToPhone, message.MessageText,
+	)
 	if responseString != "" {
 		// response - success
 		w.WriteHeader(http.StatusBadRequest)

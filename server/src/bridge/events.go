@@ -1,4 +1,4 @@
-package handlers
+package bridge
 
 import (
 	fmt "fmt"                                  // fmt package

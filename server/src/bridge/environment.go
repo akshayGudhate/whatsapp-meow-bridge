@@ -1,8 +1,6 @@
-package services
+package bridge
 
-import (
-	godotenv "github.com/joho/godotenv"
-)
+import godotenv "github.com/joho/godotenv"
 
 /////////////////////
 //   environment   //
