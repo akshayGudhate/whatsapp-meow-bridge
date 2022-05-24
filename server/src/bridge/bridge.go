@@ -16,6 +16,8 @@ import (
 	types "go.mau.fi/whatsmeow/types"
 	events "go.mau.fi/whatsmeow/types/events"
 	proto "google.golang.org/protobuf/proto"
+
+	services "akshayGudhate/whatsapp-bridge/src/services"
 )
 
 ///////////////////
@@ -29,9 +31,17 @@ type Database struct {
 }
 
 // placeholders
-var err error
-var db Database
-var MeowClient *whatsmeow.Client
+var (
+	err        error
+	db         Database
+	MeowClient *whatsmeow.Client
+)
+
+// env variables
+var (
+	DATABASE_URL = services.DATABASE_URL
+	DATABASE_DIALECT = services.DATABASE_DIALECT
+)
 
 //////////////////
 //   database   //
@@ -39,11 +49,8 @@ var MeowClient *whatsmeow.Client
 
 // method to connect database
 func (db *Database) ConnectToDatabase() {
-	databaseDialect := GetEnvironmentVariables("DATABASE_DIALECT")
-	databaseURL := GetEnvironmentVariables("DATABASE_URL")
-
 	// connection
-	db.Container, err = sqlstore.New(databaseDialect, databaseURL, nil)
+	db.Container, err = sqlstore.New(DATABASE_DIALECT, DATABASE_URL, nil)
 	if err != nil {
 		panic(err)
 	}

@@ -7,7 +7,14 @@ import (
 
 	api "akshayGudhate/whatsapp-bridge/src/api"
 	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
+	services "akshayGudhate/whatsapp-bridge/src/services"
 )
+
+///////////////////
+//   variables   //
+///////////////////
+
+var PORT = services.PORT
 
 /////////////////////
 //   main method   //
@@ -23,18 +30,15 @@ func main() {
 		bridge.StartSyncingToAllExistingDevices()
 	}()
 
-	// het port from env file
-	portNumber := bridge.GetEnvironmentVariables("PORT")
-
 	// server
 	srv := &http.Server{
-		Addr:     portNumber,
+		Addr:     PORT,
 		ErrorLog: errorLog,
 		Handler:  api.GetHandlerWithRoutes(),
 	}
 
 	// initialize
-	infoLog.Printf("Server is listening on Port URL: http://localhost%s", portNumber)
+	infoLog.Printf("Server is listening on Port URL: http://localhost%s", PORT)
 	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
