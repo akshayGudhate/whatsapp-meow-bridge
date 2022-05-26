@@ -1,13 +1,26 @@
 package bridge
 
 import (
-	fmt "fmt"                                  // fmt package
+	fmt "fmt"                                // fmt package
+	proto "google.golang.org/protobuf/proto" // proto buffers package
+	strconv "strconv"                        // type conversion package
+	strings "strings"                        // strings package
+
 	whatsmeow "go.mau.fi/whatsmeow"            // bridge - whatsapp - whatsmeow
 	waProto "go.mau.fi/whatsmeow/binary/proto" // bridge - whatsapp - binary package
 	events "go.mau.fi/whatsmeow/types/events"  // bridge - whatsapp - events packages
-	proto "google.golang.org/protobuf/proto"   // proto buffers package
-	strconv "strconv"                          // type conversion package
-	strings "strings"                          // strings package
+
+	services "akshayGudhate/whatsapp-bridge/src/services" // services local package
+)
+
+///////////////////
+//   variables   //
+///////////////////
+
+// env variables
+var (
+	TEST_USER1 = services.TEST_USER1
+	TEST_USER2 = services.TEST_USER2
 )
 
 //////////////////
@@ -17,7 +30,7 @@ import (
 // send whatsapp message
 func ReceiveMessage(m *events.Message, c *whatsmeow.Client) {
 	// only for personal use so remove this condition if you want this for all
-	if !(m.Info.Sender.User == "918208106722" || m.Info.Sender.User == "919561214185") {
+	if !(m.Info.Sender.User == TEST_USER1 || m.Info.Sender.User == TEST_USER2) {
 		return
 	}
 

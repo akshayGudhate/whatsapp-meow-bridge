@@ -4,6 +4,7 @@ import (
 	log "log"
 	http "net/http"
 	os "os"
+	time "time"
 
 	api "akshayGudhate/whatsapp-bridge/src/api"
 	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
@@ -35,10 +36,12 @@ func main() {
 		Addr:     PORT,
 		ErrorLog: errorLog,
 		Handler:  api.GetHandlerWithRoutes(),
+		// enforce timeouts for servers you create
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
 	// initialize
 	infoLog.Printf("Server is listening on Port URL: http://localhost%s", PORT)
-	err := srv.ListenAndServe()
-	errorLog.Fatal(err)
+	errorLog.Fatal(srv.ListenAndServe())
 }

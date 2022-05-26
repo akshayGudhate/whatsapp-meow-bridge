@@ -1,7 +1,7 @@
-# whatsmeow-whatsapp-bridge
-- By Akshay Gudhate
+# Whatsmeow-Whatsapp-Bridge
+> By Akshay Gudhate
 
-whatsmeow is a Go library for the WhatsApp web multidevice API created by Tulir Asokan.
+> Whatsmeow is a Go library for the WhatsApp web multidevice API created by Tulir Asokan.
 [![Go Reference](https://pkg.go.dev/badge/go.mau.fi/whatsmeow.svg)](https://pkg.go.dev/go.mau.fi/whatsmeow)
 
 
@@ -19,6 +19,12 @@ Using the above library we I have created a HTTP server, which can handle multip
 
 - Clone the project using `https://github.com/akshayGudhate/whatsapp-meow-bridge.git`.
 - Open server folder `cd server` where the HTTPS server code has been added.
+- Add `.env` file and add below environment variables as per your local environment. *TEST_USER1, TEST_USER2* are the phone numbers like *9195xxxxxx85* for which bot is available.
+  1. PORT
+  2. DATABASE_DIALECT
+  3. DATABASE_URL
+  4. TEST_USER1
+  5. TEST_USER2
 - Run `go mod tidy` in server folder.
 - Run `go build` and then `./whatsapp-bridge` to run the code or simply Run `go run .` to start the HTTP server.
 
