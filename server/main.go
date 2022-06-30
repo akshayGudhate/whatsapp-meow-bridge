@@ -26,10 +26,8 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	go func() {
-		// goroutines for syncing client connections
-		bridge.StartSyncingToAllExistingDevices()
-	}()
+	// goroutines for syncing client connections
+	go func() { bridge.StartSyncingToAllExistingDevices() }()
 
 	// server
 	srv := &http.Server{

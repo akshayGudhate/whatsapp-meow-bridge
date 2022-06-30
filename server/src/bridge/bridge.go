@@ -229,9 +229,7 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	//
 	// send message
 	//
-	go func() {
-		_, err = MeowClient.SendMessage(recipient, "", messageText)
-	}()
+	go func() { _, err = MeowClient.SendMessage(recipient, "", messageText) }()
 	if err != nil {
 		return "Something went wrong! Try Again."
 	}
