@@ -1,5 +1,5 @@
 # Whatsmeow-Whatsapp-Bridge
-> By Akshay Gudhate
+> By Akshay Gudhate (Shrimant Peshawa)
 
 > Whatsmeow is a Go library for the WhatsApp web multidevice API created by Tulir Asokan.
 [![Go Reference](https://pkg.go.dev/badge/go.mau.fi/whatsmeow.svg)](https://pkg.go.dev/go.mau.fi/whatsmeow)
