@@ -72,6 +72,8 @@ type KeepAliveRestored struct{}
 // LoggedOut is emitted when the client has been unpaired from the phone.
 //
 // This can happen while connected (stream:error messages) or right after connecting (connect failure messages).
+//
+// This will not be emitted when the logout is initiated by this client (using Client.LogOut()).
 type LoggedOut struct {
 	// OnConnect is true if the event was triggered by a connect failure message.
 	// If it's false, the event was triggered by a stream:error message.
@@ -303,7 +305,9 @@ type Presence struct {
 
 // JoinedGroup is emitted when you join or are added to a group.
 type JoinedGroup struct {
-	Reason string // If the event was triggered by you using an invite link, this will be "invite"
+	Reason    string          // If the event was triggered by you using an invite link, this will be "invite".
+	Type      string          // "new" if it's a newly created group.
+	CreateKey types.MessageID // If you created the group, this is the same message ID you passed to CreateGroup.
 	types.GroupInfo
 }
 
