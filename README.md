@@ -1,35 +1,32 @@
-# Whatsmeow-Whatsapp-Bridge
-> By Akshay Gudhate (Shrimant Peshawa)
-
-> Whatsmeow is a Go library for the WhatsApp web multidevice API created by Tulir Asokan.
+# whatsmeow
 [![Go Reference](https://pkg.go.dev/badge/go.mau.fi/whatsmeow.svg)](https://pkg.go.dev/go.mau.fi/whatsmeow)
 
+whatsmeow is a Go library for the WhatsApp web multidevice API.
 
-## Project Features
-Using the above library we I have created a HTTP server, which can handle multiple `WhatsApp*` devices simultaneously.
+## Discussion
+Matrix room: [#whatsmeow:maunium.net](https://matrix.to/#/#whatsmeow:maunium.net)
 
-* Receiving all messages and save them for future use.
-* Receiving Group messages and join leave notification.
-* Automated replies + tried a bot.
-* Message sending over HTTP call.
-* New device connection over HTTP call.
-* Whatsapp contact list.
+## Usage
+The [godoc](https://pkg.go.dev/go.mau.fi/whatsmeow) includes docs for all methods and event types.
+There's also a [simple example](https://godocs.io/go.mau.fi/whatsmeow#example-package) at the top.
 
-### How to use
+Also see [mdtest](./mdtest) for a CLI tool you can easily try out whatsmeow with.
 
-- Clone the project using `https://github.com/akshayGudhate/whatsapp-meow-bridge.git`.
-- Open server folder `cd server` where the HTTPS server code has been added.
-- Add `.env` file and add below environment variables as per your local environment. *TEST_USER1, TEST_USER2* are the phone numbers like *9195xxxxxx85* for which bot is available.
-  1. PORT
-  2. DATABASE_DIALECT
-  3. DATABASE_URL
-  4. TEST_USER1
-  5. TEST_USER2
-- Run `go mod tidy` in server folder.
-- Run `go build` and then `./whatsapp-bridge` to run the code or simply Run `go run .` to start the HTTP server.
+## Features
+Most core features are already present:
 
-### Supported API's
-- Adding `API-Collection.json` file for the reference
+* Sending messages to private chats and groups (both text and media)
+* Receiving all messages
+* Managing groups and receiving group change events
+* Joining via invite messages, using and creating invite links
+* Sending and receiving typing notifications
+* Sending and receiving delivery and read receipts
+* Reading app state (contact list, chat pin/mute status, etc)
+* Sending and handling retry receipts if message decryption fails
+* Sending status messages (experimental, may not work for large contact lists)
 
-* 1. Connect to server: `http://localhost:8080/api/connect/qr?fromPhone=9195xxxxxx85` provide *fromPhone* --> Scan the QR code using whatsapp.
-* 2. Send whatsapp message: `http://localhost:8080/api/whatsapp/send` provide *fromPhone*, *toPhone* and *messageText*.
+Things that are not yet implemented:
+
+* Writing app state (contact list, chat pin/mute status, etc)
+* Sending broadcast list messages (this is not supported on WhatsApp web either)
+* Calls
