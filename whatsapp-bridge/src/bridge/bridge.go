@@ -5,9 +5,9 @@ package bridge
 //////////////////
 
 import (
+	// internal packages
 	context "context"
-	fmt "fmt"
-
+	// external packages
 	_ "github.com/lib/pq"
 	whatsmeow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
@@ -16,8 +16,8 @@ import (
 	types "go.mau.fi/whatsmeow/types"
 	events "go.mau.fi/whatsmeow/types/events"
 	proto "google.golang.org/protobuf/proto"
-
-	services "akshayGudhate/whatsapp-bridge/src/services"
+	// local packages
+	env "akshayGudhate/whatsapp-bridge/src/environment"
 )
 
 ///////////////////
@@ -37,27 +37,21 @@ var (
 	MeowClient *whatsmeow.Client
 )
 
-// env variables
-var (
-	DATABASE_URL     = services.DATABASE_URL
-	DATABASE_DIALECT = services.DATABASE_DIALECT
-)
-
 //////////////////
 //   database   //
 //////////////////
 
 // method to connect database
-func (db *Database) ConnectToDatabase() {
+func (db *Database) connectToDatabase() {
 	// connection
-	db.Container, err = sqlstore.New(DATABASE_DIALECT, DATABASE_URL, nil)
+	db.Container, err = sqlstore.New(env.DATABASE_DIALECT, env.DATABASE_URL, nil)
 	if err != nil {
 		panic(err)
 	}
 }
 
 // method to get all connect devices
-func (db *Database) GetAllConnectedDevices() {
+func (db *Database) getAllConnectedDevices() {
 	db.DeviceStore, err = db.Container.GetAllDevices()
 	if err != nil {
 		panic(err)
@@ -69,13 +63,13 @@ func (db *Database) GetAllConnectedDevices() {
 //////////////////
 
 // method to establish client connection
-func WhatsappClientConnection(client *whatsmeow.Client) {
+func whatsappClientConnection(client *whatsmeow.Client) {
 	err = client.Connect()
 	if err != nil {
 		panic(err)
 	}
 	if client.Store.ID != nil {
-		fmt.Println("Connected to --->", client.Store.ID)
+		env.InfoLogger.Println("Connected to --->", client.Store.ID)
 	}
 }
 
@@ -86,10 +80,10 @@ func WhatsappClientConnection(client *whatsmeow.Client) {
 func StartSyncingToAllExistingDevices() {
 	// connect to database
 	if db.Container == nil {
-		db.ConnectToDatabase()
+		db.connectToDatabase()
 	}
 	// all connected devices updated
-	db.GetAllConnectedDevices()
+	db.getAllConnectedDevices()
 
 	// run goroutines to sync devices
 	go func() {
@@ -100,7 +94,7 @@ func StartSyncingToAllExistingDevices() {
 			// add receive handler
 			MeowClient.AddEventHandler(eventHandler)
 			// connect to client
-			WhatsappClientConnection(MeowClient)
+			whatsappClientConnection(MeowClient)
 		}
 	}()
 }
@@ -112,10 +106,10 @@ func StartSyncingToAllExistingDevices() {
 func SyncWithGivenDevice(phone string) string {
 	// connect to database
 	if db.Container == nil {
-		db.ConnectToDatabase()
+		db.connectToDatabase()
 	}
 	// all connected devices updated
-	db.GetAllConnectedDevices()
+	db.getAllConnectedDevices()
 
 	// search device and connect
 	var userDevice *store.Device
@@ -145,7 +139,7 @@ func SyncWithGivenDevice(phone string) string {
 		// No ID stored, new login
 		qrChan, _ := MeowClient.GetQRChannel(context.Background())
 		// connect to client
-		WhatsappClientConnection(MeowClient)
+		whatsappClientConnection(MeowClient)
 
 		for evt := range qrChan {
 			if evt.Event == "code" {
@@ -156,7 +150,7 @@ func SyncWithGivenDevice(phone string) string {
 
 	} else {
 		// connect to client
-		WhatsappClientConnection(MeowClient)
+		whatsappClientConnection(MeowClient)
 	}
 	return ""
 }
@@ -170,25 +164,25 @@ func eventHandler(event interface{}) {
 	switch v := event.(type) {
 	// messages
 	case *events.Message:
-		ReceiveMessage(v, MeowClient)
+		receiveMessage(v, MeowClient)
 	case *events.PairSuccess:
-		fmt.Println("Connected to --->", &v.ID)
+		env.InfoLogger.Println("Connected to --->", &v.ID)
 
 		/** Uncomment below comments to get below info */
 
 		// // group info
 		// case *events.GroupInfo:
 		// 	if v.Join != nil {
-		// 		fmt.Println("Group Details: Group Joined:", v.Join)
+		// 		env.InfoLogger.Println("Group Details: Group Joined:", v.Join)
 		// 	}
 		// 	if v.Leave != nil {
-		// 		fmt.Println("Group Details: Group Leaved:", v.Leave)
+		// 		env.InfoLogger.Println("Group Details: Group Leaved:", v.Leave)
 		// 	}
 
 		// default:
-		// 	fmt.Println(".........................................")
+		// 	env.InfoLogger.Println(".........................................")
 		// 	fmt.Printf("Unknown Event: %+v \n", v)
-		// 	fmt.Println(".........................................")
+		// 	env.InfoLogger.Println(".........................................")
 	}
 }
 
@@ -196,10 +190,10 @@ func eventHandler(event interface{}) {
 func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	// connect to database
 	if db.Container == nil {
-		db.ConnectToDatabase()
+		db.connectToDatabase()
 	}
 	// all connected devices updated
-	db.GetAllConnectedDevices()
+	db.getAllConnectedDevices()
 
 	// search device and connect
 	var userDevice *store.Device
@@ -220,7 +214,7 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	// add receive handler
 	MeowClient.AddEventHandler(eventHandler)
 	// connect to client
-	WhatsappClientConnection(MeowClient)
+	whatsappClientConnection(MeowClient)
 
 	// encode the data
 	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
@@ -233,6 +227,5 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	if err != nil {
 		return "Something went wrong! Try Again."
 	}
-
 	return ""
 }

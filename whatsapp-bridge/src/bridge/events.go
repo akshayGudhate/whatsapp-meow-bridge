@@ -1,26 +1,17 @@
 package bridge
 
 import (
-	fmt "fmt"                                // fmt package
-	proto "google.golang.org/protobuf/proto" // proto buffers package
-	strconv "strconv"                        // type conversion package
-	strings "strings"                        // strings package
-
-	whatsmeow "go.mau.fi/whatsmeow"            // bridge - whatsapp - whatsmeow
-	waProto "go.mau.fi/whatsmeow/binary/proto" // bridge - whatsapp - binary package
-	events "go.mau.fi/whatsmeow/types/events"  // bridge - whatsapp - events packages
-
-	services "akshayGudhate/whatsapp-bridge/src/services" // services local package
-)
-
-///////////////////
-//   variables   //
-///////////////////
-
-// env variables
-var (
-	TEST_USER1 = services.TEST_USER1
-	TEST_USER2 = services.TEST_USER2
+	// internal packages
+	fmt "fmt"
+	strconv "strconv"
+	strings "strings"
+	// external packages
+	whatsmeow "go.mau.fi/whatsmeow"
+	waProto "go.mau.fi/whatsmeow/binary/proto"
+	events "go.mau.fi/whatsmeow/types/events"
+	proto "google.golang.org/protobuf/proto"
+	// local packages
+	env "akshayGudhate/whatsapp-bridge/src/environment"
 )
 
 //////////////////
@@ -28,9 +19,9 @@ var (
 //////////////////
 
 // send whatsapp message
-func ReceiveMessage(m *events.Message, c *whatsmeow.Client) {
+func receiveMessage(m *events.Message, c *whatsmeow.Client) {
 	// only for personal use so remove this condition if you want this for all
-	if !(m.Info.Sender.User == TEST_USER1 || m.Info.Sender.User == TEST_USER2) {
+	if !(m.Info.Sender.User == env.TEST_USER1 || m.Info.Sender.User == env.TEST_USER2) {
 		return
 	}
 
@@ -40,7 +31,7 @@ func ReceiveMessage(m *events.Message, c *whatsmeow.Client) {
 	if *m.Message.Conversation != "" {
 		if m.Info.IsGroup {
 			// group message
-			fmt.Println(
+			env.InfoLogger.Println(
 				"Group Details: ", *m.Message.Conversation,
 				"---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
 				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
@@ -48,7 +39,7 @@ func ReceiveMessage(m *events.Message, c *whatsmeow.Client) {
 			)
 		} else {
 			// personal message
-			fmt.Println(
+			env.InfoLogger.Println(
 				"Personal Message: ", *m.Message.Conversation,
 				"---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
 				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
