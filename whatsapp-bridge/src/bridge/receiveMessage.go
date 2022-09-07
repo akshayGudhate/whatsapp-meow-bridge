@@ -72,14 +72,14 @@ func receiveMessageEventHandler(m *events.Message) {
 				fromPhone := strings.Split(m.Info.DeviceSentMeta.DestinationJID, "@")[0]
 				// send message
 				env.InfoLogger.Println(fromPhone, m.Info.Sender.User, messageText)
-				SendWhatsappMessage(fromPhone, m.Info.Sender.User, messageText)
+				SendWhatsappMessage(&fromPhone, &m.Info.Sender.User, &messageText)
 			case "1", "2", "3", "4":
 				idx, _ := strconv.Atoi(*m.Message.Conversation)
 				messageText := fmt.Sprintf("Thank you for selecting! You have selected *%s*.", strings.Split(products[idx-1], ": ")[1])
 				fromPhone := strings.Split(m.Info.DeviceSentMeta.DestinationJID, "@")[0]
 				// send message
 				env.InfoLogger.Println(fromPhone, m.Info.Sender.User, messageText)
-				SendWhatsappMessage(fromPhone, m.Info.Sender.User, messageText)
+				SendWhatsappMessage(&fromPhone, &m.Info.Sender.User, &messageText)
 			}
 		}
 	} else {
@@ -87,6 +87,6 @@ func receiveMessageEventHandler(m *events.Message) {
 		fromPhone := strings.Split(m.Info.DeviceSentMeta.DestinationJID, "@")[0]
 		// send message
 		env.InfoLogger.Println(fromPhone, m.Info.Sender.User, messageText)
-		SendWhatsappMessage(fromPhone, m.Info.Sender.User, messageText)
+		SendWhatsappMessage(&fromPhone, &m.Info.Sender.User, &messageText)
 	}
 }

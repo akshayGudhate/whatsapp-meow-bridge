@@ -10,7 +10,7 @@ import (
 )
 
 // Send Message
-func SendWhatsappMessage(fromPhone, toPhone, text string) string {
+func SendWhatsappMessage(fromPhone, toPhone, receivedMessageText *string) string {
 	// connect to database
 	if db.Container == nil {
 		db.connectToDatabase()
@@ -22,7 +22,7 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	var userDevice *store.Device
 	// check existing devices
 	for _, device := range db.DeviceStore {
-		if device.ID.User == fromPhone {
+		if device.ID.User == *fromPhone {
 			userDevice = device
 			break
 		}
@@ -40,8 +40,8 @@ func SendWhatsappMessage(fromPhone, toPhone, text string) string {
 	whatsappClientConnection(meowClient)
 
 	// encode the data
-	recipient, _ := types.ParseJID(toPhone + "@s.whatsapp.net")
-	messageText := &waProto.Message{Conversation: proto.String(text)}
+	recipient, _ := types.ParseJID(*toPhone + "@s.whatsapp.net")
+	messageText := &waProto.Message{Conversation: proto.String(*receivedMessageText)}
 
 	//
 	// send message

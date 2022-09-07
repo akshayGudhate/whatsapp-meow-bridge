@@ -69,7 +69,7 @@ func StartSyncingToAllExistingDevices() {
 //  single device  //
 /////////////////////
 
-func SyncWithGivenDevice(phone string) string {
+func SyncWithGivenDevice(phone *string) string {
 	// connect to database
 	if db.Container == nil {
 		db.connectToDatabase()
@@ -81,7 +81,7 @@ func SyncWithGivenDevice(phone string) string {
 	var userDevice *store.Device
 	// check existing devices
 	for _, device := range db.DeviceStore {
-		if device.ID.User == phone {
+		if device.ID.User == *phone {
 			userDevice = device
 			break
 		}
