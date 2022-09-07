@@ -31,7 +31,7 @@ func sendMessage(c *gin.Context) {
 	}
 
 	// send whatsapp message
-	responseString := bridge.SendWhatsappMessage(
+	responseString := *bridge.SendWhatsappMessage(
 		&formData.FromPhone, &formData.ToPhone, &formData.MessageText,
 	)
 	if responseString != "" {

@@ -10,7 +10,7 @@ import (
 )
 
 // Send Message
-func SendWhatsappMessage(fromPhone, toPhone, receivedMessageText *string) string {
+func SendWhatsappMessage(fromPhone, toPhone, receivedMessageText *string) *string {
 	// connect to database
 	if db.Container == nil {
 		db.connectToDatabase()
@@ -29,7 +29,8 @@ func SendWhatsappMessage(fromPhone, toPhone, receivedMessageText *string) string
 	}
 	// if not add new device
 	if userDevice == nil {
-		return "Invalid from phone number."
+		invalidResponse := "Invalid from phone number."
+		return &invalidResponse
 	}
 
 	// create client
@@ -48,7 +49,9 @@ func SendWhatsappMessage(fromPhone, toPhone, receivedMessageText *string) string
 	//
 	go func() { _, err = meowClient.SendMessage(recipient, "", messageText) }()
 	if err != nil {
-		return "Something went wrong! Try Again."
+		tryAgainResponse := "Something went wrong! Try Again."
+		return &tryAgainResponse
 	}
-	return ""
+	emptyResponse := ""
+	return &emptyResponse
 }

@@ -69,7 +69,7 @@ func StartSyncingToAllExistingDevices() {
 //  single device  //
 /////////////////////
 
-func SyncWithGivenDevice(phone *string) string {
+func SyncWithGivenDevice(phone *string) *string {
 	// connect to database
 	if db.Container == nil {
 		db.connectToDatabase()
@@ -110,7 +110,7 @@ func SyncWithGivenDevice(phone *string) string {
 		for evt := range qrChan {
 			if evt.Event == "code" {
 				// return the qr code
-				return evt.Code
+				return &evt.Code
 			}
 		}
 
@@ -118,7 +118,8 @@ func SyncWithGivenDevice(phone *string) string {
 		// connect to client
 		whatsappClientConnection(meowClient)
 	}
-	return ""
+	emptyResponse := ""
+	return &emptyResponse
 }
 
 //////////////////

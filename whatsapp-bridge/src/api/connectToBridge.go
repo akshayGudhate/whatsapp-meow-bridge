@@ -30,7 +30,7 @@ func getConnectionQRCode(c *gin.Context) {
 	}
 
 	// connect to client
-	newQRCodeBufferString := bridge.SyncWithGivenDevice(&fromPhone)
+	newQRCodeBufferString := *bridge.SyncWithGivenDevice(&fromPhone)
 	// if not connected then connect
 	if newQRCodeBufferString == "" {
 		// already scanned device
