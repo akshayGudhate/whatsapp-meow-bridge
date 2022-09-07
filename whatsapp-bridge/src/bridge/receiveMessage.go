@@ -16,10 +16,30 @@ import (
 /////////////////////
 
 // send whatsapp message
-func receiveMessage(m *events.Message) {
+func receiveMessageEventHandler(m *events.Message) {
+	// simple logger
+	if m.Info.IsGroup {
+		// group message
+		env.InfoLogger.Println(
+			"Group Details: ", *m.Message.Conversation,
+			// "---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
+			// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
+			"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
+			"---> in group", m.Info.Chat,
+		)
+	} else {
+		// personal message
+		env.InfoLogger.Println(
+			"Personal Message: ", *m.Message.Conversation,
+			// "---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
+			// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
+			"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
+		)
+	}
+
 	// only for personal use so remove this condition if you want this for all
 	// if !(m.Info.Sender.User == env.TEST_USER1 || m.Info.Sender.User == env.TEST_USER2) {
-	if !(m.Info.Sender.User == env.TEST_USER4) {
+	if !(m.Info.Sender.User == env.TEST_USER4) && *m.Message.Conversation == "" {
 		return
 	}
 

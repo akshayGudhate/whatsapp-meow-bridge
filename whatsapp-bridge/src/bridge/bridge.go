@@ -35,7 +35,7 @@ func whatsappClientConnection(client *whatsmeow.Client) {
 		panic(err)
 	}
 	if client.Store.ID != nil {
-		env.InfoLogger.Println("Connected to --->", client.Store.ID)
+		env.InfoLogger.Println("Connection Established:", client.Store.ID)
 	}
 }
 
@@ -127,30 +127,28 @@ func SyncWithGivenDevice(phone string) string {
 
 // Receive Message
 func eventHandler(event interface{}) {
-	whatsmeow.ErrIQDisconnected.Node.AttrGetter()
-
-	
 	switch v := event.(type) {
 	// messages
 	case *events.Message:
-		receiveMessage(v)
+		receiveMessageEventHandler(v)
+
+	// connection
 	case *events.PairSuccess:
-		env.InfoLogger.Println("Connected to --->", &v.ID)
+		env.InfoLogger.Println("Connection Established:", &v.ID)
 
-		/** Uncomment below comments to get below info */
+	// group info
+	case *events.GroupInfo:
+		if v.Join != nil {
+			env.InfoLogger.Println("Group Details: Group Joined:", v.Join)
+		}
+		if v.Leave != nil {
+			env.InfoLogger.Println("Group Details: Group Leaved:", v.Leave)
+		}
 
-		// // group info
-		// case *events.GroupInfo:
-		// 	if v.Join != nil {
-		// 		env.InfoLogger.Println("Group Details: Group Joined:", v.Join)
-		// 	}
-		// 	if v.Leave != nil {
-		// 		env.InfoLogger.Println("Group Details: Group Leaved:", v.Leave)
-		// 	}
-
+		// // default
 		// default:
 		// 	env.InfoLogger.Println(".........................................")
-		// 	fmt.Printf("Unknown Event: %+v \n", v)
+		// 	env.InfoLogger.Printf("Unknown Event: %+v \n", v)
 		// 	env.InfoLogger.Println(".........................................")
 	}
 }
