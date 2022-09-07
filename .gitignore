@@ -6,3 +6,4 @@ server/whatsapp-bridge
 
 # Environment
 server/.env
+whatsapp-bridge/.env

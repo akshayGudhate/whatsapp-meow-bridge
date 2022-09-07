@@ -15,8 +15,8 @@ import (
 /////////////////////
 
 func init() {
-	// goroutine for logger initiation
-	go func() { env.CreateLoggerInstances() }()
+	// logger initiation
+	env.CreateLoggerInstances()
 
 	// goroutines for syncing client connections
 	go func() { bridge.StartSyncingToAllExistingDevices() }()
