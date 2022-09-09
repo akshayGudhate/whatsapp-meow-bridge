@@ -7,6 +7,7 @@ package bridge
 import (
 	// internal packages
 	context "context"
+	sync "sync"
 	// external packages
 	whatsmeow "go.mau.fi/whatsmeow"
 	store "go.mau.fi/whatsmeow/store"
@@ -51,18 +52,28 @@ func StartSyncingToAllExistingDevices() {
 	// all connected devices updated
 	db.getAllConnectedDevices()
 
-	// run goroutines to sync devices
-	go func() {
-		// connect to all devices
-		for _, device := range db.DeviceStore {
+	wg := &sync.WaitGroup{}
+
+	// connect to all devices
+	for _, device := range db.DeviceStore {
+		// add job to wait group
+		wg.Add(1)
+
+		// run goroutines to sync devices
+		go func(device *store.Device) {
+			// job done remove from wait group
+			defer wg.Done()
 			// get client and connect one by one
 			meowClient := whatsmeow.NewClient(device, nil)
 			// add receive handler
 			meowClient.AddEventHandler(eventHandler)
 			// connect to client
 			whatsappClientConnection(meowClient)
-		}
-	}()
+		}(device)
+	}
+
+	// wait for all jobs to complete
+	wg.Wait()
 }
 
 /////////////////////

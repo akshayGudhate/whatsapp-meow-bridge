@@ -15,11 +15,17 @@ import (
 /////////////////////
 
 func init() {
-	// logger initiation
-	env.CreateLoggerInstances()
+	// create channel
+	ch := make(chan string)
+
+	// goroutines for logger initiation
+	go env.CreateLoggerInstances(&ch)
 
 	// goroutines for syncing client connections
-	go func() { bridge.StartSyncingToAllExistingDevices() }()
+	go bridge.StartSyncingToAllExistingDevices()
+
+	// wait to complete the goroutines execution
+	<-ch
 }
 
 /////////////////////
