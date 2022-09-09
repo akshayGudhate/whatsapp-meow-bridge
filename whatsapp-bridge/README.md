@@ -33,3 +33,5 @@ Using the above library we I have created a HTTP server, which can handle multip
 
 * 1. Connect to server: `http://localhost:8080/api/connect/qr?fromPhone=9195xxxxxx85` provide *fromPhone* --> Scan the QR code using whatsapp.
 * 2. Send whatsapp message: `http://localhost:8080/api/whatsapp/send` provide *fromPhone*, *toPhone* and *messageText*.
+
+# Happy Coding!
