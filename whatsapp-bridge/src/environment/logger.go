@@ -19,11 +19,12 @@ var (
 //   set loggers   //
 /////////////////////
 
-func CreateLoggerInstances(done *chan string) {
+func CreateLoggerInstances(done *chan bool) {
 	// info logs
 	InfoLogger = log.New(os.Stdout, "INFO : ", log.Ldate|log.Ltime)
 	// error logs
 	ErrorLogger = log.New(os.Stderr, "ERROR : ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	*done <- "Done"
+	// done
+	*done <- true
 }

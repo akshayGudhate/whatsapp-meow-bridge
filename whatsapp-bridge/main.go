@@ -16,7 +16,7 @@ import (
 
 func init() {
 	// create channel
-	done := make(chan string)
+	done := make(chan bool)
 
 	// goroutines for logger initiation
 	go env.CreateLoggerInstances(&done)
