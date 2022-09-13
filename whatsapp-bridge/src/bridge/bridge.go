@@ -44,15 +44,15 @@ func whatsappClientConnection(client *whatsmeow.Client) {
 //  all devices  //
 ///////////////////
 
-func StartSyncingToAllExistingDevices() {
+func StartSyncingToAllExistingDevices(wg *sync.WaitGroup) {
+	// when done
+	defer wg.Done()
 	// connect to database
 	if db.Container == nil {
 		db.connectToDatabase()
 	}
 	// all connected devices updated
 	db.getAllConnectedDevices()
-
-	wg := &sync.WaitGroup{}
 
 	// connect to all devices
 	for _, device := range db.DeviceStore {
@@ -61,7 +61,7 @@ func StartSyncingToAllExistingDevices() {
 
 		// run goroutines to sync devices
 		go func(device *store.Device) {
-			// job done remove from wait group
+			// when done
 			defer wg.Done()
 			// get client and connect one by one
 			meowClient := whatsmeow.NewClient(device, nil)
@@ -71,9 +71,6 @@ func StartSyncingToAllExistingDevices() {
 			whatsappClientConnection(meowClient)
 		}(device)
 	}
-
-	// wait for all jobs to complete
-	wg.Wait()
 }
 
 /////////////////////

@@ -3,6 +3,7 @@ package main
 import (
 	// internal packages
 	http "net/http"
+	sync "sync"
 	time "time"
 	// local packages
 	api "akshayGudhate/whatsapp-bridge/src/api"
@@ -15,17 +16,18 @@ import (
 /////////////////////
 
 func init() {
-	// create channel
-	done := make(chan bool)
+	// wait group
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
 
 	// goroutines for logger initiation
-	go env.CreateLoggerInstances(&done)
+	go env.CreateLoggerInstances(wg)
 
 	// goroutines for syncing client connections
-	go bridge.StartSyncingToAllExistingDevices()
+	go bridge.StartSyncingToAllExistingDevices(wg)
 
 	// wait to complete the goroutines execution
-	<-done
+	wg.Wait()
 }
 
 /////////////////////

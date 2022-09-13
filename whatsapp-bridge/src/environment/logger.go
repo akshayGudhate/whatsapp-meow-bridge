@@ -4,6 +4,7 @@ import (
 	// internal packages
 	log "log"
 	os "os"
+	sync "sync"
 )
 
 /////////////////////
@@ -19,12 +20,11 @@ var (
 //   set loggers   //
 /////////////////////
 
-func CreateLoggerInstances(done *chan bool) {
+func CreateLoggerInstances(wg *sync.WaitGroup) {
+	// when done
+	defer wg.Done()
 	// info logs
 	InfoLogger = log.New(os.Stdout, "INFO : ", log.Ldate|log.Ltime)
 	// error logs
 	ErrorLogger = log.New(os.Stderr, "ERROR : ", log.Ldate|log.Ltime|log.Lshortfile)
-
-	// done
-	*done <- true
 }

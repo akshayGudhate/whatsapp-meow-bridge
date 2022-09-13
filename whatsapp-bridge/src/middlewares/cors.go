@@ -18,6 +18,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// next
 		c.Next()
 	}
 }
