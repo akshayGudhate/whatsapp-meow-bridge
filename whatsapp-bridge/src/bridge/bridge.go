@@ -25,6 +25,9 @@ var (
 	err error
 )
 
+// stored all clients with phone numbers
+var mapAllClients = make(map[string]*whatsmeow.Client)
+
 //////////////////
 //    client    //
 //////////////////
@@ -65,6 +68,9 @@ func StartSyncingToAllExistingDevices(wg *sync.WaitGroup) {
 			defer wg.Done()
 			// get client and connect one by one
 			meowClient := whatsmeow.NewClient(device, nil)
+			mapAllClients[device.ID.User] = meowClient
+			// add receive handler
+			eventHandler := addEventHandlerWithDeviceInfo(device.ID.User)
 			// add receive handler
 			meowClient.AddEventHandler(eventHandler)
 			// connect to client
@@ -103,6 +109,9 @@ func SyncWithGivenDevice(phone *string) *string {
 
 	// create client
 	meowClient := whatsmeow.NewClient(userDevice, nil)
+	mapAllClients[userDevice.ID.User] = meowClient
+	// add receive handler
+	eventHandler := addEventHandlerWithDeviceInfo(userDevice.ID.User)
 	// add receive handler
 	meowClient.AddEventHandler(eventHandler)
 
@@ -134,30 +143,28 @@ func SyncWithGivenDevice(phone *string) *string {
 //    events    //
 //////////////////
 
-// Receive Message
-func eventHandler(event interface{}) {
-	switch v := event.(type) {
-	// messages
-	case *events.Message:
-		receiveMessageEventHandler(v)
+// event handler
+func addEventHandlerWithDeviceInfo(eventReceivedPhone string) func(event interface{}) {
+	// here I have used closure to close the scope of the event listener
+	// and added the receiver phone number in closed scope
+	return func(event interface{}) {
+		switch v := event.(type) {
+		// messages
+		case *events.Message:
+			receiveMessageEventHandler(v, eventReceivedPhone)
 
-	// connection
-	case *events.PairSuccess:
-		env.InfoLogger.Println("Connection Established:", &v.ID)
+		// connection
+		case *events.PairSuccess:
+			env.InfoLogger.Println("Paired Successfully:", &v.ID)
 
-	// group info
-	case *events.GroupInfo:
-		if v.Join != nil {
-			env.InfoLogger.Println("Group Details: Group Joined:", v.Join)
+		// group info
+		case *events.GroupInfo:
+			if v.Join != nil {
+				env.InfoLogger.Println("Group Details: Group Joined:", v.Join)
+			}
+			if v.Leave != nil {
+				env.InfoLogger.Println("Group Details: Group Leaved:", v.Leave)
+			}
 		}
-		if v.Leave != nil {
-			env.InfoLogger.Println("Group Details: Group Leaved:", v.Leave)
-		}
-
-		// // default
-		// default:
-		// 	env.InfoLogger.Println(".........................................")
-		// 	env.InfoLogger.Printf("Unknown Event: %+v \n", v)
-		// 	env.InfoLogger.Println(".........................................")
 	}
 }

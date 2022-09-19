@@ -16,7 +16,7 @@ import (
 /////////////////////
 
 // send whatsapp message
-func receiveMessageEventHandler(m *events.Message) {
+func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 	// simple logger
 	if m.Info.IsGroup {
 		// group message

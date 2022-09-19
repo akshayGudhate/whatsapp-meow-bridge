@@ -9,7 +9,7 @@ import (
 	bridge "akshayGudhate/whatsapp-bridge/src/bridge"
 )
 
-// customer update form
+// send message form
 type ST_Form_SendMessage struct {
 	FromPhone   string `form:"fromPhone,omitempty"`
 	ToPhone     string `form:"toPhone,omitempty"`
