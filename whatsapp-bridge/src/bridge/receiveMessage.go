@@ -6,6 +6,7 @@ import (
 	strconv "strconv"
 	strings "strings"
 	// external packages
+	phonenumbers "github.com/nyaruka/phonenumbers"
 	events "go.mau.fi/whatsmeow/types/events"
 	// local packages
 	env "akshayGudhate/whatsapp-bridge/src/environment"
@@ -17,6 +18,11 @@ import (
 
 // send whatsapp message
 func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
+	// parse country code
+	userPhone, _ := phonenumbers.Parse("+"+m.Info.Sender.User, "")
+	userCountryCode := phonenumbers.GetCountryCodeForRegion(phonenumbers.GetRegionCodeForNumber(userPhone))
+	env.InfoLogger.Println(userCountryCode)
+
 	// simple logger
 	if m.Info.IsGroup {
 		// group message
