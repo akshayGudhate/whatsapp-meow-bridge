@@ -33,13 +33,15 @@ var mapAllClients = make(map[string]*whatsmeow.Client)
 //////////////////
 
 // method to establish client connection
-func whatsappClientConnection(client *whatsmeow.Client) {
+func whatsappClientConnection(client *whatsmeow.Client, phone *string) {
 	err = client.Connect()
 	if err != nil {
 		panic(err)
 	}
 	if client.Store.ID != nil {
 		env.InfoLogger.Println("Connection Established:", client.Store.ID)
+		// add user device to map
+		mapAllClients[*phone] = client
 	}
 }
 
@@ -72,13 +74,12 @@ func StartSyncingToAllExistingDevices(wg *sync.WaitGroup) {
 				defer wg.Done()
 				// get client and connect one by one
 				meowClient := whatsmeow.NewClient(device, nil)
-				mapAllClients[device.ID.User] = meowClient
 				// add receive handler
 				eventHandler := addEventHandlerWithDeviceInfo(device.ID.User)
 				// add receive handler
 				meowClient.AddEventHandler(eventHandler)
 				// connect to client
-				whatsappClientConnection(meowClient)
+				whatsappClientConnection(meowClient, &device.ID.User)
 			}(device)
 		}
 	}
@@ -114,9 +115,8 @@ func SyncWithGivenDevice(phone *string) *string {
 
 	// create client
 	meowClient := whatsmeow.NewClient(userDevice, nil)
-	mapAllClients[userDevice.ID.User] = meowClient
 	// add receive handler
-	eventHandler := addEventHandlerWithDeviceInfo(userDevice.ID.User)
+	eventHandler := addEventHandlerWithDeviceInfo(*phone)
 	// add receive handler
 	meowClient.AddEventHandler(eventHandler)
 
@@ -127,8 +127,7 @@ func SyncWithGivenDevice(phone *string) *string {
 		// No ID stored, new login
 		qrChan, _ := meowClient.GetQRChannel(context.Background())
 		// connect to client
-		whatsappClientConnection(meowClient)
-
+		whatsappClientConnection(meowClient, phone)
 		for evt := range qrChan {
 			if evt.Event == "code" {
 				// return the qr code
@@ -138,7 +137,7 @@ func SyncWithGivenDevice(phone *string) *string {
 
 	} else {
 		// connect to client
-		whatsappClientConnection(meowClient)
+		whatsappClientConnection(meowClient, phone)
 	}
 	emptyResponse := ""
 	return &emptyResponse

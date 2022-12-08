@@ -21,7 +21,6 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 	// parse country code
 	userPhone, _ := phonenumbers.Parse("+"+m.Info.Sender.User, "")
 	userCountryCode := phonenumbers.GetCountryCodeForRegion(phonenumbers.GetRegionCodeForNumber(userPhone))
-	env.InfoLogger.Println(userCountryCode)
 
 	// simple logger
 	if m.Info.IsGroup {
@@ -32,7 +31,9 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 			// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
 			"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
 			"---> in group", m.Info.Chat,
+			"---> country code", userCountryCode,
 		)
+
 	} else {
 		// personal message
 		env.InfoLogger.Println(
@@ -40,6 +41,7 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 			// "---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
 			// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
 			"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
+			"---> country code", userCountryCode,
 		)
 	}
 
@@ -59,7 +61,9 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 				// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
 				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
 				"---> in group", m.Info.Chat,
+				"---> country code", userCountryCode,
 			)
+
 		} else {
 			// personal message
 			env.InfoLogger.Println(
@@ -67,6 +71,7 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 				// "---> to: ", "(", m.Info.DeviceSentMeta.DestinationJID, ")",
 				// "---> to: ", "(", *m.RawMessage.DeviceSentMessage.DestinationJid, ")",
 				"---> from: ", m.Info.PushName, "(", m.Info.Sender, ")",
+				"---> country code", userCountryCode,
 			)
 
 			// products details
@@ -88,6 +93,7 @@ func receiveMessageEventHandler(m *events.Message, eventReceivedPhone string) {
 				SendWhatsappMessage(&fromPhone, &m.Info.Sender.User, &messageText)
 			}
 		}
+
 	} else {
 		messageText := "Please, enter valid text!"
 		fromPhone := strings.Split(m.Info.DeviceSentMeta.DestinationJID, "@")[0]
